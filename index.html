@@ -1,0 +1,383 @@
+<!-- Minimalistic Pocket Money & Expense Tracker with Backend (Express.js) -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pocket Money & Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #7498f3;
+            margin: 0;
+            color: #222;
+        }
+        
+        .container {
+            max-width: 430px;
+            margin: 48px auto;
+            background: #ffffff;
+            padding: 32px 26px 26px 26px;
+            border-radius: 20px;
+            box-shadow: 0 6px 32px rgba(60, 72, 88, 0.10);
+        }
+        
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+        
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 22px;
+            background: #f8fafc;
+            padding: 18px 14px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.06);
+        }
+        
+        form input,
+        form select {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f1f5f9;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        
+        form input:focus,
+        form select:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+        
+        form input[type="text"] {
+            grid-column: span 2;
+        }
+        
+        form button {
+            grid-column: span 2;
+            padding: 12px 0;
+            background: linear-gradient(90deg, #3b82f6 60%, #6366f1 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.07);
+            transition: background 0.2s;
+        }
+        
+        form button:hover {
+            background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%);
+        }
+        
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+        
+        .balance {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #10b981;
+            background: #f0fdf4;
+            padding: 8px 18px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(16, 185, 129, 0.07);
+        }
+        
+        .filter {
+            margin-left: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            padding: 8px;
+            font-size: 1em;
+        }
+        
+        ul.transactions {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 28px 0;
+        }
+        
+        ul.transactions li {
+            background: #f8fafc;
+            margin-bottom: 10px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1em;
+            box-shadow: 0 1px 6px rgba(60, 72, 88, 0.04);
+            transition: box-shadow 0.2s;
+        }
+        
+        ul.transactions li:hover {
+            box-shadow: 0 2px 12px rgba(60, 72, 88, 0.09);
+        }
+        
+        .income {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .expense {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .category-label {
+            font-size: 0.95em;
+            color: #64748b;
+            background: #e0e7ef;
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin-left: 6px;
+        }
+        
+        .actions button {
+            margin-left: 8px;
+            background: #e0e7ef;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 5px 14px;
+            font-size: 0.97em;
+            color: #334155;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .actions button:hover {
+            background: #c7d2fe;
+            color: #3730a3;
+        }
+        
+        canvas {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 8px rgba(60, 72, 88, 0.04);
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            text-align: center;
+            font-size: 1.08em;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 16px;
+            letter-spacing: 0.2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pocket Money & Expense Tracker</h1>
+        <form id="transaction-form">
+            <input type="number" id="amount" placeholder="Amount" required min="1">
+            <select id="type" required>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <select id="category" required>
+                <option value="">Category</option>
+                <option value="food">Food</option>
+                <option value="travel">Travel</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="shopping">Shopping</option>
+                <option value="other">Other</option>
+            </select>
+            <input type="text" id="description" placeholder="Description" maxlength="40">
+            <button type="submit">Add</button>
+        </form>
+        <div class="summary">
+            <span class="balance">Balance: ₹<span id="balance">0</span></span>
+            <select id="filter-category" class="filter">
+                <option value="">All</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+                <option value="food">Food</option>
+                <option value="travel">Travel</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="shopping">Shopping</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <ul class="transactions" id="transaction-list">
+            <!-- Transactions will be rendered here -->
+        </ul>
+        <h2>Spending by Category</h2>
+        <canvas id="category-chart" width="380" height="220"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --- Minimalistic Frontend Logic ---
+        let editId = null;
+        let transactions = [];
+
+        async function fetchTransactions() {
+            const res = await fetch('transactions.php');
+            transactions = await res.json();
+        }
+
+        async function addTransaction(data) {
+            const res = await fetch('transactions.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await res.json();
+        }
+
+        async function updateTransaction(id, data) {
+            await fetch('transactions.php?id=' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function deleteTransaction(id) {
+            await fetch('transactions.php?id=' + id, {
+                method: 'DELETE'
+            });
+        }
+
+        function calculateBalance() {
+            return transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
+        }
+
+        function renderBalance() {
+            document.getElementById('balance').textContent = calculateBalance();
+        }
+
+        function renderTransactions(filter = '') {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = '';
+            let filtered = transactions;
+            if (filter) {
+                if (filter === 'income' || filter === 'expense') {
+                    filtered = transactions.filter(t => t.type === filter);
+                } else {
+                    filtered = transactions.filter(t => t.category === filter);
+                }
+            }
+            filtered.forEach(t => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                <span class="${t.type}">
+                    ₹${t.amount} <span class="category-label">[${t.category}]</span> ${t.description ? '- ' + t.description : ''} <small style="color:#888;">${new Date(t.date).toLocaleDateString()}</small>
+                </span>
+                <span class="actions">
+                    <button onclick="editTransaction('${t.id}')">Edit</button>
+                    <button onclick="removeTransaction('${t.id}')">Delete</button>
+                </span>
+            `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('category-chart').getContext('2d');
+            const categories = ['food', 'travel', 'entertainment', 'shopping', 'other'];
+            const data = categories.map(cat =>
+                transactions.filter(t => t.type === 'expense' && t.category === cat)
+                .reduce((sum, t) => sum + t.amount, 0)
+            );
+            if (window.categoryChart) window.categoryChart.destroy();
+            window.categoryChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#f87171', '#60a5fa', '#fbbf24', '#34d399', '#a78bfa']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('transaction-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            if (!amount || !type || !category) return;
+            if (editId) {
+                await updateTransaction(editId, {
+                    amount,
+                    type,
+                    category,
+                    description
+                });
+                editId = null;
+                this.querySelector('button[type="submit"]').textContent = 'Add';
+            } else {
+                await addTransaction({
+                    amount,
+                    type,
+                    category,
+                    description
+                });
+            }
+            await refresh();
+            this.reset();
+        };
+
+        window.editTransaction = async function(id) {
+            const t = transactions.find(t => t.id === id);
+            document.getElementById('amount').value = t.amount;
+            document.getElementById('type').value = t.type;
+            document.getElementById('category').value = t.category;
+            document.getElementById('description').value = t.description;
+            editId = id;
+            document.querySelector('form button[type="submit"]').textContent = 'Update';
+        };
+
+        window.removeTransaction = async function(id) {
+            await deleteTransaction(id);
+            await refresh();
+        };
+
+        document.getElementById('filter-category').onchange = function() {
+            renderTransactions(this.value);
+        };
+
+        async function refresh() {
+            await fetchTransactions();
+            renderBalance();
+            renderTransactions(document.getElementById('filter-category').value);
+            renderChart();
+        }
+
+        refresh();
+    </script>
+</body>
+
+</html>
