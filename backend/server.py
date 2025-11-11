@@ -158,6 +158,8 @@ async def import_initial_data():
                 semesters = ['1', '2', '3', '4', '5', '6', '7', '8']
                 users_df['department'] = np.random.choice(departments, len(users_df))
                 users_df['semester'] = np.random.choice(semesters, len(users_df))
+                # Convert phone to string
+                users_df['phone'] = users_df['phone'].astype(str)
                 users_data = users_df.to_dict('records')
                 if users_data:
                     await db.users.insert_many(users_data)
